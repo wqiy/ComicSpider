@@ -23,12 +23,12 @@ class CopycomicSpider(scrapy.Spider):
             # yield scrapy.Request(url=url, callback=self.parse_detail(url=url))
             yield SeleniumRequest(
                 url=url,
-                callback=self.prase_detail,
+                callback=self.parse_detail,
                 wait_time=10,
                 wait_until=EC.element_to_be_clickable((By.CLASS_NAME, 'table-default')),
             )
 
-    def prase_detail(self, response):
+    def parse_detail(self, response):
         comic_item = ComicItem()
         comic_item['comicName'] = str(response.css('h6::text').get())
         comic_item['comicAuthor'] = str(response.css('span.comicParticulars-right-txt a::text').getall())
