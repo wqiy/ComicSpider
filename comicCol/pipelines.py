@@ -14,14 +14,15 @@ class ComicsNoDuplicatesPipeline:
             comic_info TEXT,
             tags TEXT,
             img_url TEXT,
-            comic_url TEXT NOT NULL,
-            site TEXT NOT NULL
+            comic_url TEXT,
+            site TEXT NOT NULL,
+            status TEXT
         )
         """)
         self.cur.execute("""
-        CREATE TABLE IF NOT EXISTS details(
+        CREATE TABLE IF NOT EXISTS chapters(
             comic_name TEXT,
-            chapter_name TEXT NOT NULL PRIMARY KEY, 
+            chapter_name TEXT, 
             chapter_url TEXT NOT NULL,
             CONSTRAINT fk_name
             FOREIGN KEY(comic_name)
@@ -38,7 +39,7 @@ class ComicsNoDuplicatesPipeline:
                 spider.logger.warn("Comic already in database: %s" % item['comicName'])
             else:
                 self.cur.execute("""
-                    INSERT INTO comics (comic_name, comic_author, comic_info, tags, img_url, comic_url, site) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO comics (comic_name, comic_author, comic_info, tags, img_url, comic_url, site, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                                  (
                                      item['comicName'],
@@ -47,17 +48,18 @@ class ComicsNoDuplicatesPipeline:
                                      str(item['tags']),
                                      item['imgUrl'],
                                      item['comicUrl'],
-                                     item['site']
+                                     item['site'],
+                                     item['status']
                                  ))
                 self.con.commit()
         elif isinstance(item, ChapterItem):
-            self.cur.execute("select * from details where chapter_name = ?", (item['chapterName'],))
+            self.cur.execute("select * from chapters where chapter_url = ?", (item['chapterUrl'],))
             result = self.cur.fetchone()
             if result:
                 spider.logger.warn("Chapter already in database: %s" % item['chapterName'])
             else:
                 self.cur.execute("""
-                                INSERT INTO details (comic_name, chapter_name, chapter_url) VALUES (?, ?, ?)
+                                INSERT INTO chapters (comic_name, chapter_name, chapter_url) VALUES (?, ?, ?)
                             """,
                                  (
                                      item['comicName'],

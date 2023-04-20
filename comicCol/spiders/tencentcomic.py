@@ -1,6 +1,7 @@
 import scrapy
 from comicCol.items import ComicItem
 from comicCol.items import ChapterItem
+from comicCol.items import ChapterImageItem
 from scrapy_selenium import SeleniumRequest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -28,6 +29,7 @@ class TencentcomicSpider(scrapy.Spider):
         comics = response.css('li.ret-search-item')
         comic_item = ComicItem()
         comic_item['site'] = 'Tencent'
+        comic_item['status'] = ''
         for comic in comics:
             comic_item['comicName'] = comic.css('a.mod-cover-list-thumb').attrib['title']
             comic_item['comicAuthor'] = comic.css('p.ret-works-author::text').get()
@@ -44,11 +46,18 @@ class TencentcomicSpider(scrapy.Spider):
                 # script="document.querySelector('.mod_page_next').click()"
             )
 
+    # 解析漫画详情
     def parse_detail(self, response):
-        chapters = response.css('span.works-chapter-item')
         chapter_item = ChapterItem()
+        chapters = response.css('span.works-chapter-item')
+
         chapter_item['comicName'] = response.css('h2.works-intro-title strong::text').get()
         for chapter in chapters:
             chapter_item['chapterName'] = chapter.css('a::text').get().strip()
-            chapter_item['chapterUrl'] = "https://ac.qq.com/{}".format(chapters[1].css('a').attrib['href'])
+            chapter_item['chapterUrl'] = "https://ac.qq.com{}".format(chapter.css('a').attrib['href'])
             yield chapter_item
+
+    def prase_chapter_all_image(self, response):
+        pass
+        # chapter_image_item = ChapterImageItem()
+        # imageUrls = response.css
