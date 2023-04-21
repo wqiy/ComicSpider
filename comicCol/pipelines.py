@@ -1,6 +1,6 @@
 from itemadapter import ItemAdapter
-from .items import ComicItem, ChapterItem
 import sqlite3
+from .items import ChapterItem, ComicItem
 
 
 class ComicsNoDuplicatesPipeline:
@@ -24,11 +24,21 @@ class ComicsNoDuplicatesPipeline:
             comic_name TEXT,
             chapter_name TEXT, 
             chapter_url TEXT NOT NULL,
+            image_urls TEXT,
             CONSTRAINT fk_name
             FOREIGN KEY(comic_name)
             REFERENCES comics(comic_name)
         )
         """)
+        # self.cur.execute("""
+        # CREATE TABLE IF NOT EXISTS images(
+        #     chapter_name TEXT,
+        #     image_url TEXT NOT NULL,
+        #     CONSTRAINT fk_name
+        #     FOREIGN KEY(chapter_name)
+        #     REFERENCES comics(chapter_name)
+        # )
+        # """)
 
     def process_item(self, item, spider):
         if isinstance(item, ComicItem):
@@ -37,6 +47,17 @@ class ComicsNoDuplicatesPipeline:
             result = self.cur.fetchone()
             if result:
                 spider.logger.warn("Comic already in database: %s" % item['comicName'])
+                # self.cur.execute("""
+                #     UPDATE comics SET comic_author=?, comic_info=?, tags=?, img_url=?, comic_url=?, status=? WHERE comic_name=?
+                # """, (
+                #     item['comicAuthor'],
+                #     item['comicInfo'],
+                #     str(item['tags']),
+                #     item['imgUrl'],
+                #     item['comicUrl'],
+                #     item['status'],
+                #     item['comicName'],
+                # ))
             else:
                 self.cur.execute("""
                     INSERT INTO comics (comic_name, comic_author, comic_info, tags, img_url, comic_url, site, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -59,13 +80,28 @@ class ComicsNoDuplicatesPipeline:
                 spider.logger.warn("Chapter already in database: %s" % item['chapterName'])
             else:
                 self.cur.execute("""
-                                INSERT INTO chapters (comic_name, chapter_name, chapter_url) VALUES (?, ?, ?)
+                                INSERT INTO chapters (comic_name, chapter_name, chapter_url, image_urls) VALUES (?, ?, ?, ?)
                             """,
                                  (
                                      item['comicName'],
                                      item['chapterName'],
                                      item['chapterUrl'],
+                                     item['chapterImageUrl'],
                                  ))
                 self.con.commit()
+        # elif isinstance(item, ChapterImageUrlItem):
+        #     self.cur.execute("select * from images where image_url = ?", (item['chapterImageUrl'],))
+        #     result = self.cur.fetchone()
+        #     if result:
+        #         spider.logger.warn("Image already in database: %s" % item['chapterImageUrl'])
+        #     else:
+        #         self.cur.execute("""
+        #                         INSERT INTO chapters (chapter_name, image_url) VALUES (?, ?)
+        #                         """,
+        #                          (
+        #                              item['chapterName'],
+        #                              item['chapterImageUrl'],
+        #                          ))
+        #         self.con.commit()
         else:
             return item

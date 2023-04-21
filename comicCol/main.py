@@ -4,4 +4,4 @@ import os
 
 
 sys.path.append(os.path.dirname(__file__))
-execute(["scrapy", "crawl", "6manhua"])
+execute(["scrapy", "crawl", "baozimh"])

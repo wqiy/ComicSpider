@@ -25,8 +25,9 @@ class ChapterItem(scrapy.Item):
     comicName = scrapy.Field()
     chapterName = scrapy.Field()
     chapterUrl = scrapy.Field()
-
-
-class ChapterImageItem(scrapy.Item):
-    chapterName = scrapy.Field()
     chapterImageUrl = scrapy.Field()
+
+
+# class ChapterImageUrlItem(scrapy.Item):
+#     chapterName = scrapy.Field()
+#     chapterImageUrl = scrapy.Field()

@@ -46,4 +46,15 @@ class CopycomicSpider(scrapy.Spider):
         for chapter in response.css('div#default全部 ul a'):
             chapter_item['chapterName'] = str(chapter.css('li::text').get())
             chapter_item['chapterUrl'] = "https://www.copymanga.site{}".format(chapter.css('a').attrib['href'])
-            yield chapter_item
+            yield (chapter_item, SeleniumRequest(
+                url="https://www.copymanga.site{}".format(chapter.css('a').attrib['href']),
+                callback=self.parse_chapter_detail,
+                wait_time=10,
+                wait_until=EC.element_to_be_clickable((By.CLASS_NAME, 'table-default')),
+            ))
+    def parse_chapter_detail(self, response):
+        pass
+    #     chapter_image_item = ChapterImageUrlItem()
+    #     for image in response.css():
+    #         chapter_image_item['chapterName'] = image.css()
+    #         chapter_image_item['chapterImageUrl'] = image.css()

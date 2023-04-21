@@ -1,7 +1,6 @@
 import scrapy
 from comicCol.items import ComicItem
 from comicCol.items import ChapterItem
-from comicCol.items import ChapterImageItem
 from scrapy_selenium import SeleniumRequest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
